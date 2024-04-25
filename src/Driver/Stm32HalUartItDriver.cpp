@@ -6,29 +6,32 @@
 #include "Stm32HalUartItDriver.hpp"
 #include "globals.hpp"
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
+/*
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     if (huart->Instance == USART3) {
         Debugger_log(DBG, "HAL_UART_RxCpltCallback()");
-        Serial3Driver.isr(16);
-    }
-//        HAL_UART_Receive_IT(&huart3, rx_buff, 10); //You need to toggle a breakpoint on this line!
-}
-
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
-{
-    if (huart->Instance == USART3) {
-//        Debugger_log(DBG, "HAL_UARTEx_RxEventCallback()");
-        Serial3Driver.isr(Size);
     }
 }
+ */
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+    auto obj = Stm32Serial::AbstractDriver::findInRegistryByUniqueId((uint32_t) &huart->Instance);
+    if (obj != nullptr) {
+        auto *driver = dynamic_cast<Stm32Serial::Stm32HalUartItDriver *>(obj);
+        if(driver != nullptr) {
+            driver->txIsr();
+        }
+    }
+}
 
 
-
-void Stm32HalUartItDriver_isr(UART_HandleTypeDef *huart) {
-//    Debugger_log(DBG, "Stm32HalUartItDriver_isr() RxState=0x%2x", huart->RxState);
-//    if (huart->RxState == HAL_UART_STATE_READY) {
-//        Serial3Driver.isr();
-//    }
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+    auto obj = Stm32Serial::AbstractDriver::findInRegistryByUniqueId((uint32_t) &huart->Instance);
+    if (obj != nullptr) {
+        auto *driver = dynamic_cast<Stm32Serial::Stm32HalUartItDriver *>(obj);
+        if(driver != nullptr) {
+            driver->rxIsr(Size);
+        }
+    }
 }
 
