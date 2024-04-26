@@ -91,7 +91,7 @@ size_t Stm32Serial::Stm32Serial::setWrittenBytes(size_t size) {
 void Stm32Serial::Stm32Serial::loop() {
 
     if (rxBuffer.getLength() > 0) {
-        Debugger_log(DBG, "Received: '%.*s'", rxBuffer.getLength(), rxBuffer.getStart());
+        Debugger_log(DBG, "Received: '%.*s'", rxBuffer.getLength(), rxBuffer.getReadPointer());
         rxBuffer.clear();
     }
 

@@ -20,8 +20,8 @@ void Stm32HalUartItDriver_isr(UART_HandleTypeDef *huart);
 #define LIBSMART_STM32SERIAL_STM32HALUARTITDRIVER_HPP
 
 
-#include "src/AbstractDriver.hpp"
-#include "src/Stm32Serial.hpp"
+#include "AbstractDriver.hpp"
+#include "Stm32Serial.hpp"
 
 /**
  *
@@ -58,7 +58,7 @@ namespace Stm32Serial {
         void txIsr() {
             auto txBuffer = getTxBuffer();
             if (txBuffer->getLength() > 0) {
-                auto ret = this->transmit(txBuffer->getStart(), txBuffer->getLength());
+                auto ret = this->transmit(txBuffer->getReadPointer(), txBuffer->getLength());
                 if (ret > 0) {
                     txBuffer->remove(ret);
                 }
