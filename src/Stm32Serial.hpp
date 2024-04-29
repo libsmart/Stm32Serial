@@ -21,7 +21,6 @@
 
 
 namespace Stm32Serial {
-
     class AbstractDriver;
 
     /**
@@ -33,7 +32,6 @@ namespace Stm32Serial {
         friend class AbstractDriver;
 
     public:
-
         /**
          * @brief Stm32Serial constructor
          *
@@ -177,14 +175,27 @@ namespace Stm32Serial {
         void loop();
 
 
-
         typedef Stm32Common::StringBuffer<BUFFER_SIZE_TX> txBuffer_t;
         typedef Stm32Common::StringBuffer<BUFFER_SIZE_RX> rxBuffer_t;
 
     private:
         AbstractDriver *driver;
         rxBuffer_t rxBuffer;
-        txBuffer_t txBuffer;
+        // txBuffer_t txBuffer;
+
+        class txBufferClass final : public txBuffer_t {
+        public:
+            txBufferClass() = delete;
+
+            explicit txBufferClass(Stm32Serial &self)
+                : self(self) {
+            }
+
+        protected:
+            void onWrite() override;
+
+            Stm32Serial &self;
+        } txBuffer{*this};
     };
 }
 

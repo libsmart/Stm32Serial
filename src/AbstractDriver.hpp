@@ -153,9 +153,9 @@ namespace Stm32Serial {
          * If no empty slot is found, the function does nothing.
          */
         void registerDriver() {
-            for (size_t i = 0; i < (sizeof registry / sizeof registry[0]); i++) {
-                if (registry[i] == nullptr) {
-                    registry[i] = this;
+            for (auto & i : registry) {
+                if (i == nullptr) {
+                    i = this;
                     return;
                 }
             }

@@ -5,6 +5,7 @@
 
 #include "Stm32Serial.hpp"
 #include "AbstractDriver.hpp"
+#include "Stm32GcodeRunner.hpp"
 
 Stm32Serial::Stm32Serial::Stm32Serial(AbstractDriver *driver) : driver(driver) {
     driver->setSerialInstance(this);
@@ -13,13 +14,6 @@ Stm32Serial::Stm32Serial::Stm32Serial(AbstractDriver *driver) : driver(driver) {
 
 void Stm32Serial::Stm32Serial::begin(unsigned long baud, uint8_t config) {
     driver->begin(baud, config);
-//            write("Hallo Welt\r\n");
-
-    print("Hallo Welt ");
-    print(17L);
-    print(' ');
-    print(3.1415);
-    println();
 }
 
 
@@ -89,13 +83,57 @@ size_t Stm32Serial::Stm32Serial::setWrittenBytes(size_t size) {
 
 
 void Stm32Serial::Stm32Serial::loop() {
+    Stm32Common::buf_size_signed_t posR = rxBuffer.findPos('\r');
+    Stm32Common::buf_size_signed_t posN = rxBuffer.findPos('\n');
+    const Stm32Common::buf_size_signed_t eolPos = std::max(posR, posN);
+    if (eolPos > 0) {
+        Stm32GcodeRunner::AbstractCommand *cmd{};
+        const size_t cmdLen = std::min(posR < 0 ? SIZE_MAX : posR, posN < 0 ? SIZE_MAX : posN);
+        auto parserRet = Stm32GcodeRunner::parser.parseString(
+            cmd, reinterpret_cast<const char *>(rxBuffer.getReadPointer()), cmdLen);
+        rxBuffer.remove(eolPos + 1);
 
-    if (rxBuffer.getLength() > 0) {
-        Debugger_log(DBG, "Received: '%.*s'", rxBuffer.getLength(), rxBuffer.getReadPointer());
-        rxBuffer.clear();
+        if (parserRet == Stm32GcodeRunner::Parser::parserReturn::OK) {
+            Debugger_log(DBG, "Found command: %s", cmd->getName());
+            Stm32GcodeRunner::CommandContext *cmdCtx{};
+            Stm32GcodeRunner::worker->createCommandContext(cmdCtx);
+            if (cmdCtx == nullptr) {
+                txBuffer.println("ERROR: Command buffer full");
+                return;
+            }
+            cmdCtx->setCommand(cmd);
+
+            cmdCtx->registerOnWriteFunction([cmdCtx, this]() {
+                // Debugger_log(DBG, "onWriteFn()");
+                if (cmdCtx->outputLength() > 0) {
+                    const auto result = cmdCtx->outputRead(
+                        reinterpret_cast<char *>(this->txBuffer.getWritePointer()),
+                        this->txBuffer.getRemainingSpace());
+                    this->txBuffer.setWrittenBytes(result);
+                }
+            });
+
+            cmdCtx->registerOnCmdEndFunction([cmdCtx]() {
+                // Debugger_log(DBG, "onCmdEndFn()");
+                Stm32GcodeRunner::worker->deleteCommandContext(cmdCtx);
+            });
+
+            Stm32GcodeRunner::worker->enqueueCommandContext(cmdCtx);
+        } else if (parserRet == Stm32GcodeRunner::Parser::parserReturn::UNKNOWN_COMMAND) {
+            txBuffer.println("ERROR: UNKNOWN COMMAND");
+        } else if (parserRet == Stm32GcodeRunner::Parser::parserReturn::GARBAGE_STRING) {
+            txBuffer.println("ERROR: UNKNOWN COMMAND");
+        } else {
+            // txBuffer.println("ERROR: ONLY WHITESPACE");
+        }
     }
+
 
     driver->checkTxBufferAndSend();
 }
 
+void Stm32Serial::Stm32Serial::txBufferClass::onWrite() {
+    StringBuffer::onWrite();
+    self.driver->checkTxBufferAndSend();
+}
 
