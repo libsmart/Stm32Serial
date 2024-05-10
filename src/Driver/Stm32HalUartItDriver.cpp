@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <libsmart_config.hpp>
+#ifdef LIBSMART_STM32SERIAL_ENABLE_HAL_UART_IT_DRIVER
+
 #include "Stm32HalUartItDriver.hpp"
 #include "globals.hpp"
 
@@ -35,3 +38,4 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     }
 }
 
+#endif

@@ -5,7 +5,7 @@
 
 #include "Stm32Serial.hpp"
 #include "AbstractDriver.hpp"
-#include "Stm32GcodeRunner.hpp"
+//#include "Stm32GcodeRunner.hpp"
 
 Stm32Serial::Stm32Serial::Stm32Serial(AbstractDriver *driver) : driver(driver) {
     driver->setSerialInstance(this);
@@ -81,7 +81,7 @@ size_t Stm32Serial::Stm32Serial::setWrittenBytes(size_t size) {
     return txBuffer.add(size);
 }
 
-
+/*
 void Stm32Serial::Stm32Serial::loop() {
     Stm32Common::buf_size_signed_t posR = rxBuffer.findPos('\r');
     Stm32Common::buf_size_signed_t posN = rxBuffer.findPos('\n');
@@ -129,6 +129,11 @@ void Stm32Serial::Stm32Serial::loop() {
     }
 
 
+    driver->checkTxBufferAndSend();
+}
+ */
+
+void Stm32Serial::Stm32Serial::loop() {
     driver->checkTxBufferAndSend();
 }
 

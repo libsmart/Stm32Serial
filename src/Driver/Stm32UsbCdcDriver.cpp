@@ -4,8 +4,12 @@
  */
 
 #include <libsmart_config.hpp>
-#ifdef LIBSMART_STM32SERIAL_ENABLE_HAL_UART_THREADX_POLL_DRIVER
+#ifdef LIBSMART_STM32SERIAL_ENABLE_USB_CDC_DRIVER
 
-#include "Stm32HalUartThreadXPollDriver.hpp"
+#include "Stm32UsbCdcDriver.hpp"
+
+using namespace Stm32Serial;
+
+Stm32UsbCdcDriver *Stm32UsbCdcDriver::self = {};
 
 #endif

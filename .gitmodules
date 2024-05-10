@@ -1,0 +1,3 @@
+[submodule "examples/stm32f1_usb_serial/Lib/Stm32Common"]
+	path = examples/stm32f1_usb_serial/Lib/Stm32Common
+	url = https://github.com/libsmart/Stm32Common.git

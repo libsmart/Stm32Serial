@@ -6,18 +6,17 @@
 #ifndef LIBSMART_STM32SERIAL_STM32SERIAL_HPP
 #define LIBSMART_STM32SERIAL_STM32SERIAL_HPP
 
+#include <libsmart_config.hpp>
 #include <cstdint>
 #include <climits>
-#include "main.hpp"
-#include "usart.h"
+//#include "main.hpp"
+//#include "usart.h"
 #include "StringBuffer.hpp"
 #include "Stream.hpp"
 
 
 #define DEFAULT_BAUD 115200
 #define DEFAULT_CONFIG 0
-#define BUFFER_SIZE_RX 256
-#define BUFFER_SIZE_TX 256
 
 
 namespace Stm32Serial {
@@ -85,7 +84,7 @@ namespace Stm32Serial {
         /**
          * @brief Get the number of bytes (characters) available for reading from the serial port.
          *
-         * This is data that’s already arrived and stored in the serial receive buffer (which holds BUFFER_SIZE_RX bytes).
+         * This is data that’s already arrived and stored in the serial receive buffer (which holds LIBSMART_STM32SERIAL_BUFFER_SIZE_RX bytes).
          *
          * @return number of bytes available for reading
          */
@@ -175,8 +174,8 @@ namespace Stm32Serial {
         void loop();
 
 
-        typedef Stm32Common::StringBuffer<BUFFER_SIZE_TX> txBuffer_t;
-        typedef Stm32Common::StringBuffer<BUFFER_SIZE_RX> rxBuffer_t;
+        typedef Stm32Common::StringBuffer<LIBSMART_STM32SERIAL_BUFFER_SIZE_TX> txBuffer_t;
+        typedef Stm32Common::StringBuffer<LIBSMART_STM32SERIAL_BUFFER_SIZE_RX> rxBuffer_t;
 
     private:
         AbstractDriver *driver;
