@@ -38,6 +38,7 @@ void loop() {
     Serial.print("counter = ");
     Serial.print(dummyCpp);
     Serial.println();
+    Serial.flush();
 
 
     HAL_GPIO_WritePin(LED1_GRN_GPIO_Port, LED1_GRN_Pin, dummyCpp & 2 ? GPIO_PIN_RESET : GPIO_PIN_SET);

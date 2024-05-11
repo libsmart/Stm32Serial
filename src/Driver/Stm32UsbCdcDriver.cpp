@@ -12,4 +12,12 @@ using namespace Stm32Serial;
 
 Stm32UsbCdcDriver *Stm32UsbCdcDriver::self = {};
 
+void Stm32UsbCdcDriver::flush() {
+    AbstractDriver::flush();
+    auto txBuffer = getTxBuffer();
+    while(!txBuffer->isEmpty()) {
+        checkTxBufferAndSend();
+    }
+}
+
 #endif

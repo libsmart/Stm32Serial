@@ -38,19 +38,14 @@ namespace Stm32Serial {
         };
 
 
-
         void begin(unsigned long baud, uint8_t config) override {
             AbstractDriver::begin(baud, config);
             self = this;
             USBD_Interface_fops_FS.Receive=Stm32UsbCdcDriver::CDC_Receive_FS;
-
-
-
-            //tx_thread_sleep(UX_MS_TO_TICK(500));
-            // Hardware reset rendered harmless!
-
         }
 
+
+        void flush() override;
 
     protected:
         static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len) {
