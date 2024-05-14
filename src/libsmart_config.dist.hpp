@@ -39,6 +39,17 @@
 //#define LIBSMART_STM32SERIAL_ENABLE_HAL_UART_IT_DRIVER
 
 
+/**
+ * Size of the TX buffer for sending by interrupt.
+ */
+#define LIBSMART_STM32SERIAL_HAL_UART_IT_BUFFER_SIZE_TX 32
+
+
+/**
+ * Size of the RX buffer for reception by interrupt.
+ */
+#define LIBSMART_STM32SERIAL_HAL_UART_IT_BUFFER_SIZE_RX 32
+
 
 /**
  * Enable or disable the HAL uart ThreadX poll driver.

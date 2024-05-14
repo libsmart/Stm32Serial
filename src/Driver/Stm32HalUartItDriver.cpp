@@ -5,25 +5,20 @@
 
 #include <libsmart_config.hpp>
 #include "Stm32HalUartItDriver.hpp"
+
+#include "EmptyLogger.hpp"
 #include "globals.hpp"
+#include "Helper.hpp"
 
 #ifdef LIBSMART_STM32SERIAL_ENABLE_HAL_UART_IT_DRIVER
 
-
-/*
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    if (huart->Instance == USART3) {
-        Debugger_log(DBG, "HAL_UART_RxCpltCallback()");
-    }
-}
- */
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     auto obj = Stm32Serial::AbstractDriver::findInRegistryByUniqueId((uint32_t) &huart->Instance);
     if (obj != nullptr) {
         auto *driver = dynamic_cast<Stm32Serial::Stm32HalUartItDriver *>(obj);
-        if(driver != nullptr) {
-            driver->txIsr();
+        if (driver != nullptr) {
+            driver->_txIsr();
         }
     }
 }
@@ -33,34 +28,33 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     auto obj = Stm32Serial::AbstractDriver::findInRegistryByUniqueId((uint32_t) &huart->Instance);
     if (obj != nullptr) {
         auto *driver = dynamic_cast<Stm32Serial::Stm32HalUartItDriver *>(obj);
-        if(driver != nullptr) {
-            driver->rxIsr(Size);
+        if (driver != nullptr) {
+            driver->_rxIsr(Size);
         }
     }
 }
 
 
-
 void Stm32Serial::Stm32HalUartItDriver::begin(unsigned long baud, uint8_t config) {
-    AbstractDriver::begin(baud, config);
-    //            HAL_UART_MspInit(huart);
-    //            HAL_UART_Init(huart);
-    HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
+    logger.println("Stm32Serial::Stm32HalUartItDriver::begin()");
 
-    //            HAL_UART_Receive_IT(huart, rx_buff, sizeof rx_buff);
+    AbstractDriver::begin(baud, config);
+    auto ret = HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
+    if (ret != HAL_OK) {
+        logger.printf("%lu: HAL_UARTEx_ReceiveToIdle_IT = 0x%02x\r\n", millis(), ret);
+    }
 }
 
 
-
-
-void Stm32Serial::Stm32HalUartItDriver::rxIsr(uint16_t Size) {
+void Stm32Serial::Stm32HalUartItDriver::_rxIsr(uint16_t Size) {
     getRxBuffer()->write(rx_buff, Size);
     getTxBuffer()->write(rx_buff, Size);
     memset(rx_buff, 0, sizeof rx_buff);
     HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
 }
 
-void Stm32Serial::Stm32HalUartItDriver::txIsr() {
+
+void Stm32Serial::Stm32HalUartItDriver::_txIsr() {
     auto txBuffer = getTxBuffer();
     if (txBuffer->getLength() > 0) {
         auto ret = this->transmit(txBuffer->getReadPointer(), txBuffer->getLength());
@@ -68,6 +62,16 @@ void Stm32Serial::Stm32HalUartItDriver::txIsr() {
             txBuffer->remove(ret);
         }
     }
+}
+
+
+void Stm32Serial::Stm32HalUartItDriver::loop() {
+    AbstractDriver::loop();
+}
+
+
+void Stm32Serial::Stm32HalUartItDriver::checkTxBufferAndSend() {
+    _txIsr();
 }
 
 

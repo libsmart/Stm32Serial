@@ -10,24 +10,45 @@
 #include "Stm32Serial.hpp"
 
 namespace Stm32Serial {
-
     class AbstractDriver {
         friend class Stm32Serial;
 
     public:
-        AbstractDriver(Stm32Serial *ser, const char *name, uint32_t uniqueId) : ser(ser), name(name),
-                                                                                uniqueId(uniqueId) {
+        virtual ~AbstractDriver() = default;
+
+        AbstractDriver(Stm32Serial *ser, const char *name, const uint32_t uniqueId)
+            : ser(ser), name(name), uniqueId(uniqueId) {
             registerDriver();
         }
 
-        AbstractDriver(Stm32Serial *ser, uint32_t uniqueId) : AbstractDriver(ser, nullptr, uniqueId) {}
+        AbstractDriver(Stm32Serial *ser, const uint32_t uniqueId)
+            : AbstractDriver(ser, nullptr, uniqueId) { ; }
 
-        explicit AbstractDriver(const char *name) : AbstractDriver(nullptr, name, (uint32_t) this) {}
+        explicit AbstractDriver(const char *name) : AbstractDriver(nullptr, name, reinterpret_cast<uint32_t>(this)) { ; }
 
-        explicit AbstractDriver(uint32_t uniqueId) : AbstractDriver(nullptr, nullptr, uniqueId) {}
+        explicit AbstractDriver(const uint32_t uniqueId) : AbstractDriver(nullptr, nullptr, uniqueId) { ; }
 
-        AbstractDriver(const char *name, uint32_t uniqueId) : AbstractDriver(nullptr, name, uniqueId) {}
+        AbstractDriver(const char *name, const uint32_t uniqueId) : AbstractDriver(nullptr, name, uniqueId) { ; }
 
+        [[nodiscard]] const char *getName() const { return name; }
+
+        [[nodiscard]] uint32_t getUniqueId() const { return uniqueId; }
+
+        static AbstractDriver *findInRegistryByName(const char *name) {
+            for (const auto item: registry) {
+                if (strcmp(item->getName(), name) == 0) return item;
+            }
+            return nullptr;
+        }
+
+        static AbstractDriver *findInRegistryByUniqueId(const uint32_t uniqueId) {
+            for (const auto item: registry) {
+                if (item->getUniqueId() == uniqueId) return item;
+            }
+            return nullptr;
+        }
+
+    protected:
         /**
          * @brief Initializes the serial communication with the specified baud rate and configuration.
          *
@@ -36,7 +57,16 @@ namespace Stm32Serial {
          * @param baud - The baud rate for the serial communication.
          * @param config - The configuration for the serial communication.
          */
-        virtual void begin(unsigned long baud, uint8_t config) {}
+        virtual void begin(unsigned long baud, uint8_t config) { ; }
+
+        /**
+         * @brief Performs the processing loop for the serial communication.
+         *
+         * This function is internally called by the Stm32Serial class.
+         * It should be reimplemented by a derived class to define the specific behavior
+         * required for the main processing loop of the serial communication driver.
+         */
+        virtual void loop() { ; }
 
 
         /**
@@ -45,13 +75,13 @@ namespace Stm32Serial {
          * This function should be implemented by a derived class.
          * It is responsible for stopping the serial communication.
          */
-        virtual void end() {}
+        virtual void end() { ; }
 
 
         /**
          * @brief Flushes the serial communication buffer.
          */
-        virtual void flush() {}
+        virtual void flush() { ; }
 
 
         /**
@@ -61,26 +91,6 @@ namespace Stm32Serial {
         virtual bool isConnected() { return true; }
 
 
-        const char *getName() { return name; }
-
-        [[nodiscard]] uint32_t getUniqueId() const { return uniqueId; }
-
-        static AbstractDriver *findInRegistryByName(const char *name) {
-            for (auto item: registry) {
-                if (strcmp(item->getName(), name) == 0) return item;
-            }
-            return nullptr;
-        }
-
-        static AbstractDriver *findInRegistryByUniqueId(uint32_t uniqueId) {
-            for (auto item: registry) {
-                if (item->getUniqueId() == uniqueId) return item;
-            }
-            return nullptr;
-        }
-
-
-    protected:
         /**
          * @brief Set the serial instance for the Stm32Serial object.
          *
@@ -120,7 +130,7 @@ namespace Stm32Serial {
           * It checks if there is any data in the transmit buffer and sends it over the serial communication.
           * If there is no data in the buffer, this function does nothing.
           */
-        virtual void checkTxBufferAndSend() {}
+        virtual void checkTxBufferAndSend() { ; }
 
 
         /**
@@ -143,8 +153,6 @@ namespace Stm32Serial {
          */
         virtual Stm32Serial::txBuffer_t *getTxBuffer() { return &ser->txBuffer; }
 
-
-    protected:
 
         /**
          * @brief Registers the current driver in the registry.
