@@ -9,8 +9,6 @@
 #include <libsmart_config.hpp>
 #include <cstdint>
 #include <climits>
-//#include "main.hpp"
-//#include "usart.h"
 #include "StringBuffer.hpp"
 #include "Stream.hpp"
 
@@ -171,16 +169,15 @@ namespace Stm32Serial {
          * It checks if there is any data received in the rxBuffer and logs it using the Debugger_log function.
          * It then clears the rxBuffer. Finally, it calls the checkTxBufferAndSend function of the driver to transmit any pending data in the txBuffer.
          */
-        void loop();
+        virtual void loop();
 
 
         typedef Stm32Common::StringBuffer<LIBSMART_STM32SERIAL_BUFFER_SIZE_TX> txBuffer_t;
         typedef Stm32Common::StringBuffer<LIBSMART_STM32SERIAL_BUFFER_SIZE_RX> rxBuffer_t;
 
-    private:
+    protected:
         AbstractDriver *driver;
         rxBuffer_t rxBuffer;
-        // txBuffer_t txBuffer;
 
         class txBufferClass final : public txBuffer_t {
         public:
