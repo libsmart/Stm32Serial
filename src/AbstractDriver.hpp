@@ -6,6 +6,7 @@
 #ifndef LIBSMART_STM32SERIAL_ABSTRACTDRIVER_HPP
 #define LIBSMART_STM32SERIAL_ABSTRACTDRIVER_HPP
 
+#include <libsmart_config.hpp>
 #include "Stm32Serial.hpp"
 
 namespace Stm32Serial {
@@ -21,7 +22,7 @@ namespace Stm32Serial {
 
         AbstractDriver(Stm32Serial *ser, uint32_t uniqueId) : AbstractDriver(ser, nullptr, uniqueId) {}
 
-        explicit AbstractDriver(const char *name) : AbstractDriver(nullptr, name, 0) {}
+        explicit AbstractDriver(const char *name) : AbstractDriver(nullptr, name, (uint32_t) this) {}
 
         explicit AbstractDriver(uint32_t uniqueId) : AbstractDriver(nullptr, nullptr, uniqueId) {}
 
@@ -62,7 +63,7 @@ namespace Stm32Serial {
 
         const char *getName() { return name; }
 
-        uint32_t getUniqueId() const { return uniqueId; }
+        [[nodiscard]] uint32_t getUniqueId() const { return uniqueId; }
 
         static AbstractDriver *findInRegistryByName(const char *name) {
             for (auto item: registry) {
@@ -109,7 +110,7 @@ namespace Stm32Serial {
          *
          * @return The number of bytes successfully transmitted.
          */
-        virtual size_t transmit(const uint8_t *str, size_t strlen) { return 0; }
+        virtual size_t transmit(const uint8_t *str, size_t strlen) = 0;
 
 
         /**
@@ -153,7 +154,7 @@ namespace Stm32Serial {
          * If no empty slot is found, the function does nothing.
          */
         void registerDriver() {
-            for (auto & i : registry) {
+            for (auto &i: registry) {
                 if (i == nullptr) {
                     i = this;
                     return;
@@ -168,12 +169,14 @@ namespace Stm32Serial {
         /** Name of the object */
         const char *name = {};
 
+        /** Unique id of the object */
         uint32_t uniqueId = {};
 
-        static AbstractDriver *registry[5];
-
+        /** Registry storage */
+        static AbstractDriver *registry[LIBSMART_STM32SERIAL_DRIVER_REGISTRY_SIZE];
     };
 
+    inline AbstractDriver *AbstractDriver::registry[] = {};
 }
 
 #endif //LIBSMART_STM32SERIAL_ABSTRACTDRIVER_HPP

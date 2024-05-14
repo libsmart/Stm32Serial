@@ -18,6 +18,11 @@
 #define LIBSMART_STM32SERIAL_BUFFER_SIZE_TX 256
 
 
+/**
+ * Size of the rx buffer for serial interface.
+ */
+#define LIBSMART_STM32SERIAL_DRIVER_REGISTRY_SIZE 5
+
 
 /**
  * Enable or disable the USB device CDC driver.

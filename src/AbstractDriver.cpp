@@ -6,5 +6,3 @@
 #include "AbstractDriver.hpp"
 
 using namespace Stm32Serial;
-
-AbstractDriver *AbstractDriver::registry[]={};

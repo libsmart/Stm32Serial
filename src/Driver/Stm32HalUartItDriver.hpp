@@ -46,31 +46,11 @@ namespace Stm32Serial {
                                                                    AbstractDriver((uint32_t) &huart->Instance) {
         };
 
-        void begin(unsigned long baud, uint8_t config) override {
-            AbstractDriver::begin(baud, config);
-            //            HAL_UART_MspInit(huart);
-            //            HAL_UART_Init(huart);
-            HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
+        void begin(unsigned long baud, uint8_t config) override;
 
-            //            HAL_UART_Receive_IT(huart, rx_buff, sizeof rx_buff);
-        }
+        void rxIsr(uint16_t Size);
 
-        void rxIsr(uint16_t Size) {
-            getRxBuffer()->write(rx_buff, Size);
-            getTxBuffer()->write(rx_buff, Size);
-            memset(rx_buff, 0, sizeof rx_buff);
-            HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
-        }
-
-        void txIsr() {
-            auto txBuffer = getTxBuffer();
-            if (txBuffer->getLength() > 0) {
-                auto ret = this->transmit(txBuffer->getReadPointer(), txBuffer->getLength());
-                if (ret > 0) {
-                    txBuffer->remove(ret);
-                }
-            }
-        }
+        void txIsr();
 
     protected:
         size_t transmit(const uint8_t *str, size_t strlen) override {

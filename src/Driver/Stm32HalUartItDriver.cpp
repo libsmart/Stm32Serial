@@ -4,10 +4,11 @@
  */
 
 #include <libsmart_config.hpp>
-#ifdef LIBSMART_STM32SERIAL_ENABLE_HAL_UART_IT_DRIVER
-
 #include "Stm32HalUartItDriver.hpp"
 #include "globals.hpp"
+
+#ifdef LIBSMART_STM32SERIAL_ENABLE_HAL_UART_IT_DRIVER
+
 
 /*
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
@@ -37,5 +38,37 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
         }
     }
 }
+
+
+
+void Stm32Serial::Stm32HalUartItDriver::begin(unsigned long baud, uint8_t config) {
+    AbstractDriver::begin(baud, config);
+    //            HAL_UART_MspInit(huart);
+    //            HAL_UART_Init(huart);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
+
+    //            HAL_UART_Receive_IT(huart, rx_buff, sizeof rx_buff);
+}
+
+
+
+
+void Stm32Serial::Stm32HalUartItDriver::rxIsr(uint16_t Size) {
+    getRxBuffer()->write(rx_buff, Size);
+    getTxBuffer()->write(rx_buff, Size);
+    memset(rx_buff, 0, sizeof rx_buff);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
+}
+
+void Stm32Serial::Stm32HalUartItDriver::txIsr() {
+    auto txBuffer = getTxBuffer();
+    if (txBuffer->getLength() > 0) {
+        auto ret = this->transmit(txBuffer->getReadPointer(), txBuffer->getLength());
+        if (ret > 0) {
+            txBuffer->remove(ret);
+        }
+    }
+}
+
 
 #endif
