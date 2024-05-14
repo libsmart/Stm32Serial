@@ -36,12 +36,12 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 
 
 void Stm32Serial::Stm32HalUartItDriver::begin(unsigned long baud, uint8_t config) {
-    logger.println("Stm32Serial::Stm32HalUartItDriver::begin()");
+    log()->println("Stm32Serial::Stm32HalUartItDriver::begin()");
 
     AbstractDriver::begin(baud, config);
     auto ret = HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
     if (ret != HAL_OK) {
-        logger.printf("%lu: HAL_UARTEx_ReceiveToIdle_IT = 0x%02x\r\n", millis(), ret);
+        log()->printf("%lu: HAL_UARTEx_ReceiveToIdle_IT = 0x%02x\r\n", millis(), ret);
     }
 }
 

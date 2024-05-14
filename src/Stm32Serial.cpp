@@ -9,6 +9,7 @@
 
 Stm32Serial::Stm32Serial::Stm32Serial(AbstractDriver *driver) : driver(driver) {
     driver->setSerialInstance(this);
+    driver->setLogger(loggerInstance);
 }
 
 

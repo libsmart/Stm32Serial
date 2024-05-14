@@ -10,7 +10,7 @@
 #include "Stm32Serial.hpp"
 
 namespace Stm32Serial {
-    class AbstractDriver {
+    class AbstractDriver : public Stm32ItmLogger::Loggable {
         friend class Stm32Serial;
 
     public:

@@ -34,13 +34,13 @@ namespace Stm32Serial {
 
     public:
         Stm32HalUartItDriver(UART_HandleTypeDef *huart)
-            : AbstractDriver(reinterpret_cast<uint32_t>(&huart->Instance)), huart(huart) { ; }
+                : AbstractDriver(reinterpret_cast<uint32_t>(&huart->Instance)), huart(huart) { ; }
 
         Stm32HalUartItDriver(UART_HandleTypeDef *huart, const char *name)
-            : AbstractDriver(name, reinterpret_cast<uint32_t>(&huart->Instance)), huart(huart) { ; }
+                : AbstractDriver(name, reinterpret_cast<uint32_t>(&huart->Instance)), huart(huart) { ; }
 
         Stm32HalUartItDriver(UART_HandleTypeDef *huart, const uint32_t uniqueId)
-            : AbstractDriver(uniqueId), huart(huart) { ; }
+                : AbstractDriver(uniqueId), huart(huart) { ; }
 
 
         /**

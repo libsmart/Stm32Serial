@@ -11,6 +11,7 @@
 #include <climits>
 #include "StringBuffer.hpp"
 #include "Stream.hpp"
+#include "Loggable.hpp"
 
 
 #define DEFAULT_BAUD 115200
@@ -25,7 +26,7 @@ namespace Stm32Serial {
      * @brief A class representing a serial communication interface on the STM32 platform.
      * @details This class provides methods to initialize, configure, and use the serial port for communication.
      */
-    class Stm32Serial : public Stm32Common::Stream {
+    class Stm32Serial : public Stm32ItmLogger::Loggable, public Stm32Common::Stream {
         friend class AbstractDriver;
 
     public:
@@ -184,7 +185,7 @@ namespace Stm32Serial {
             txBufferClass() = delete;
 
             explicit txBufferClass(Stm32Serial &self)
-                : self(self) {
+                    : self(self) {
             }
 
         protected:
