@@ -22,9 +22,13 @@ namespace Stm32Serial {
     class AbstractDriver;
 
     /**
-     * @class Stm32Serial
-     * @brief A class representing a serial communication interface on the STM32 platform.
-     * @details This class provides methods to initialize, configure, and use the serial port for communication.
+     * Stm32Serial constructor.
+     *
+     * Constructs a `Stm32Serial` object with an `AbstractDriver` instance as a parameter. It sets the `driver` member
+     * variable to the provided driver and establishes the bidirectional association between the `driver` and the
+     * `Stm32Serial` instance.
+     *
+     * @param driver The `AbstractDriver` object that will be associated with the `Stm32Serial` instance.
      */
     class Stm32Serial : public Stm32ItmLogger::Loggable, public Stm32Common::Stream {
         friend class AbstractDriver;
@@ -39,7 +43,21 @@ namespace Stm32Serial {
          *
          * @param driver The `AbstractDriver` object that will be associated with the `Stm32Serial` instance.
          */
-        explicit Stm32Serial(AbstractDriver *driver);
+        explicit Stm32Serial(AbstractDriver *driver): Stm32Serial(driver, &Stm32ItmLogger::emptyLogger) { ; }
+
+
+        /**
+         * @brief Stm32Serial constructor.
+         *
+         * Constructs a `Stm32Serial` object with an `AbstractDriver` instance and a `LoggerInterface` instance as
+         * parameters. It sets the `driver` member variable to the provided driver and establishes the bidirectional
+         * association between the `driver` and the `Stm32Serial` instance. Additionally, it sets the `logger` member
+         * variable to the provided logger.
+         *
+         * @param driver The `AbstractDriver` object that will be associated with the `Stm32Serial` instance.
+         * @param logger The `LoggerInterface` object that will be associated with the `Stm32Serial` instance.
+         */
+        Stm32Serial(AbstractDriver *driver, Stm32ItmLogger::LoggerInterface *logger);
 
 
         /**
@@ -185,7 +203,7 @@ namespace Stm32Serial {
             txBufferClass() = delete;
 
             explicit txBufferClass(Stm32Serial &self)
-                    : self(self) {
+                : self(self) {
             }
 
         protected:

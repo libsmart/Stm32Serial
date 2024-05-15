@@ -5,11 +5,12 @@
 
 #include "Stm32Serial.hpp"
 #include "AbstractDriver.hpp"
-//#include "Stm32GcodeRunner.hpp"
 
-Stm32Serial::Stm32Serial::Stm32Serial(AbstractDriver *driver) : driver(driver) {
+
+Stm32Serial::Stm32Serial::Stm32Serial(AbstractDriver *driver, Stm32ItmLogger::LoggerInterface *logger)
+    : Loggable(logger), driver(driver) {
     driver->setSerialInstance(this);
-    driver->setLogger(loggerInstance);
+    driver->setLogger(logger);
 }
 
 
