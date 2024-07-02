@@ -5,9 +5,14 @@
 
 #include "../../../src/libsmart_config.dist.hpp"
 #include "../Lib/Stm32Common/src/libsmart_config.dist.hpp"
+#include "../Lib/Stm32ItmLogger/src/libsmart_config.dist.hpp"
 
 /**
  * Enable or disable the USB device CDC driver.
  */
 #undef LIBSMART_STM32SERIAL_ENABLE_USB_CDC_DRIVER
 #define LIBSMART_STM32SERIAL_ENABLE_USB_CDC_DRIVER
+
+#define LIBSMART_OVERWRITE_verbose_terminate_handler
+#undef LIBSMART_ENABLE_STD_FUNCTION
+#undef LIBSMART_ENABLE_PRINTF

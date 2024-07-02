@@ -4,14 +4,12 @@
  */
 
 #include <libsmart_config.hpp>
-#include "Stm32HalUartItDriver.hpp"
+#ifdef LIBSMART_STM32SERIAL_ENABLE_HAL_UART_IT_DRIVER
 
+#include "Stm32HalUartItDriver.hpp"
 #include "EmptyLogger.hpp"
 #include "globals.hpp"
 #include "Helper.hpp"
-
-#ifdef LIBSMART_STM32SERIAL_ENABLE_HAL_UART_IT_DRIVER
-
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     auto obj = Stm32Serial::AbstractDriver::findInRegistryByUniqueId((uint32_t) &huart->Instance);
