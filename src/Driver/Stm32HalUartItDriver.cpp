@@ -39,7 +39,8 @@ void Stm32Serial::Stm32HalUartItDriver::begin(unsigned long baud, uint8_t config
     AbstractDriver::begin(baud, config);
     auto ret = HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
     if (ret != HAL_OK) {
-        log()->printf("%lu: HAL_UARTEx_ReceiveToIdle_IT = 0x%02x\r\n", millis(), ret);
+        log()->print("HAL_UARTEx_ReceiveToIdle_IT = 0x");
+        log()->println(ret, HEX);
     }
 }
 
