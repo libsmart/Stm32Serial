@@ -72,7 +72,7 @@ Stm32Serial::Stm32Serial::operator bool() {
     return driver->isConnected();
 }
 
-
+#ifdef LIBSMART_ENABLE_DIRECT_BUFFER_WRITE
 size_t Stm32Serial::Stm32Serial::getWriteBuffer(uint8_t *&buffer) {
     buffer = txBuffer.getWritePointer();
     return txBuffer.getRemainingSpace();
@@ -82,6 +82,7 @@ size_t Stm32Serial::Stm32Serial::getWriteBuffer(uint8_t *&buffer) {
 size_t Stm32Serial::Stm32Serial::setWrittenBytes(size_t size) {
     return txBuffer.add(size);
 }
+#endif
 
 
 void Stm32Serial::Stm32Serial::loop() {

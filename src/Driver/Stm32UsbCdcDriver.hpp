@@ -64,8 +64,6 @@ namespace Stm32Serial {
         }
 
         size_t transmit(const uint8_t *str, size_t strlen) override {
-            auto txBuffer = getTxBuffer();
-
             // Check, if interface is busy
             auto *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
             if (hcdc->TxState != 0) {
@@ -85,8 +83,15 @@ namespace Stm32Serial {
         void checkTxBufferAndSend() override {
             auto txBuffer = getTxBuffer();
             if (txBuffer->getLength() > 0) {
+#ifdef LIBSMART_ENABLE_DIRECT_BUFFER_READ
                 auto sentBytes = transmit(txBuffer->getReadPointer(), txBuffer->getLength());
                 txBuffer->remove(sentBytes);
+#else
+                if(const auto ch = txBuffer->peek(); ch >= 0) {
+                    auto sentBytes = transmit((uint8_t *)&ch, 1);
+                    if(sentBytes == 1) txBuffer->read();
+                }
+#endif
             }
         }
 

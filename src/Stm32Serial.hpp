@@ -156,7 +156,7 @@ namespace Stm32Serial {
          */
         operator bool();
 
-
+#ifdef LIBSMART_ENABLE_DIRECT_BUFFER_WRITE
         /**
          * @brief Get the write buffer for direct write override.
          *
@@ -179,7 +179,7 @@ namespace Stm32Serial {
          * @return The updated size of the write buffer.
          */
         size_t setWrittenBytes(size_t size) DIRECT_BUFFER_WRITE_OVERRIDE;
-
+#endif
 
         /**
          * @fn void loop()
