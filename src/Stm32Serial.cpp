@@ -35,64 +35,12 @@ void Stm32Serial::Stm32Serial::end() {
 }
 
 
-int Stm32Serial::Stm32Serial::available() {
-    return rxBuffer.getLength() > INT_MAX ? INT_MAX : (int) rxBuffer.getLength();
-}
-
-
-int Stm32Serial::Stm32Serial::peek() {
-    return rxBuffer.peek();
-}
-
-
-int Stm32Serial::Stm32Serial::read() {
-    return rxBuffer.read();
-}
-
-
-int Stm32Serial::Stm32Serial::availableForWrite() {
-    return txBuffer.getRemainingSpace() > INT_MAX ? INT_MAX : (int) txBuffer.getRemainingSpace();
-}
-
-
-void Stm32Serial::Stm32Serial::flush() {
-    driver->flush();
-}
-
-
-size_t Stm32Serial::Stm32Serial::write(uint8_t uint8) {
-    if (txBuffer.write(uint8) == 1) {
-        driver->checkTxBufferAndSend();
-        return 1;
-    } else return 0;
-}
-
-
 Stm32Serial::Stm32Serial::operator bool() {
     return driver->isConnected();
 }
-
-#ifdef LIBSMART_ENABLE_DIRECT_BUFFER_WRITE
-size_t Stm32Serial::Stm32Serial::getWriteBuffer(uint8_t *&buffer) {
-    buffer = txBuffer.getWritePointer();
-    return txBuffer.getRemainingSpace();
-}
-
-
-size_t Stm32Serial::Stm32Serial::setWrittenBytes(size_t size) {
-    return txBuffer.add(size);
-}
-#endif
 
 
 void Stm32Serial::Stm32Serial::loop() {
     driver->loop();
     driver->checkTxBufferAndSend();
 }
-
-
-void Stm32Serial::Stm32Serial::txBufferClass::onWrite() {
-    StringBuffer::onWrite();
-    self.driver->checkTxBufferAndSend();
-}
-

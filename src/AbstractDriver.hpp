@@ -140,7 +140,7 @@ namespace Stm32Serial {
          *
          * @return A pointer to the receive buffer.
          */
-        virtual Stm32Serial::rxBuffer_t *getRxBuffer() { return &ser->rxBuffer; }
+        virtual Stm32Serial::rxBuffer_t *getRxBuffer() { return ser->getRxBuffer(); }
 
 
         /**
@@ -151,7 +151,7 @@ namespace Stm32Serial {
          *
          * @return A pointer to the transmit buffer.
          */
-        virtual Stm32Serial::txBuffer_t *getTxBuffer() { return &ser->txBuffer; }
+        virtual Stm32Serial::txBuffer_t *getTxBuffer() { return ser->getTxBuffer(); }
 
 
         /**

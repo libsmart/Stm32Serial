@@ -10,9 +10,8 @@
 #include <cstdint>
 #include <climits>
 #include "StringBuffer.hpp"
-#include "Stream.hpp"
 #include "Loggable.hpp"
-
+#include "StreamRxTx.hpp"
 
 #define DEFAULT_BAUD 115200
 #define DEFAULT_CONFIG 0
@@ -30,7 +29,9 @@ namespace Stm32Serial {
      *
      * @param driver The `AbstractDriver` object that will be associated with the `Stm32Serial` instance.
      */
-    class Stm32Serial : public Stm32ItmLogger::Loggable, public Stm32Common::Stream {
+    class Stm32Serial : public Stm32ItmLogger::Loggable,
+                        public Stm32Common::StreamRxTx<LIBSMART_STM32SERIAL_BUFFER_SIZE_RX,
+                            LIBSMART_STM32SERIAL_BUFFER_SIZE_TX> {
         friend class AbstractDriver;
 
     public:
@@ -99,87 +100,10 @@ namespace Stm32Serial {
 
 
         /**
-         * @brief Get the number of bytes (characters) available for reading from the serial port.
-         *
-         * This is data that’s already arrived and stored in the serial receive buffer (which holds LIBSMART_STM32SERIAL_BUFFER_SIZE_RX bytes).
-         *
-         * @return number of bytes available for reading
-         */
-        int available() override;
-
-
-        /**
-         * @brief Get the next byte (character) from the serial port without removing it from the buffer.
-         *
-         * @return int The next byte (character) to be read from the serial port, or -1 if no data is available.
-         */
-        int peek() override;
-
-
-        /**
-         * @brief Read a byte from the serial port.
-         *
-         * @return The byte read from the serial port, or -1 if no data is available.
-         */
-        int read() override;
-
-
-        /**
-         * @brief Get the number of bytes (characters) available for writing in the serial buffer without blocking the
-         * write operation.
-         *
-         * @return The number of bytes available for writing to the serial port.
-         */
-        int availableForWrite() override;
-
-
-        /**
-         * @brief Waits for the transmission of outgoing serial data to complete.
-         */
-        void flush() override;
-
-
-        /**
-         * @brief Writes a byte to the serial port.
-         *
-         * @param uint8 The byte to be written to the serial port.
-         * @return The number of bytes written.
-         */
-        size_t write(uint8_t uint8) override;
-
-        // Make other write() methods visible.
-        using Print::write;
-
-
-        /**
          * @brief Return true, if serial port is connected.
          */
         operator bool();
 
-#ifdef LIBSMART_ENABLE_DIRECT_BUFFER_WRITE
-        /**
-         * @brief Get the write buffer for direct write override.
-         *
-         * This function returns a pointer to the write buffer and the size of the available space in the buffer.
-         * The write buffer is used for direct write override, allowing data to be written directly to the buffer
-         * without copying it. The caller can use this buffer to write data directly to the serial port.
-         *
-         * @param[out] buffer A reference to a pointer that will hold the write buffer.
-         * @return The size of the available space in the write buffer.
-         */
-        size_t getWriteBuffer(uint8_t *&buffer) DIRECT_BUFFER_WRITE_OVERRIDE;
-
-
-        /**
-         * @brief Sets the number of written bytes in the write buffer.
-         *
-         * This function sets the number of bytes that have been written to the serial port and updates the write buffer accordingly.
-         *
-         * @param size The number of bytes written.
-         * @return The updated size of the write buffer.
-         */
-        size_t setWrittenBytes(size_t size) DIRECT_BUFFER_WRITE_OVERRIDE;
-#endif
 
         /**
          * @fn void loop()
@@ -191,26 +115,8 @@ namespace Stm32Serial {
         virtual void loop();
 
 
-        typedef Stm32Common::StringBuffer<LIBSMART_STM32SERIAL_BUFFER_SIZE_TX> txBuffer_t;
-        typedef Stm32Common::StringBuffer<LIBSMART_STM32SERIAL_BUFFER_SIZE_RX> rxBuffer_t;
-
-    protected:
+    private:
         AbstractDriver *driver;
-        rxBuffer_t rxBuffer;
-
-        class txBufferClass final : public txBuffer_t {
-        public:
-            txBufferClass() = delete;
-
-            explicit txBufferClass(Stm32Serial &self)
-                : self(self) {
-            }
-
-        protected:
-            void onWrite() override;
-
-            Stm32Serial &self;
-        } txBuffer{*this};
     };
 }
 
