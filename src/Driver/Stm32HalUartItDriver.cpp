@@ -14,7 +14,11 @@
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     auto obj = Stm32Serial::AbstractDriver::findInRegistryByUniqueId((uint32_t) &huart->Instance);
     if (obj != nullptr) {
+#ifdef __GXX_RTTI
         auto *driver = dynamic_cast<Stm32Serial::Stm32HalUartItDriver *>(obj);
+#else
+        auto *driver = static_cast<Stm32Serial::Stm32HalUartItDriver *>(obj);
+#endif
         if (driver != nullptr) {
             driver->_txIsr();
         }
@@ -25,7 +29,11 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     auto obj = Stm32Serial::AbstractDriver::findInRegistryByUniqueId((uint32_t) &huart->Instance);
     if (obj != nullptr) {
+#ifdef __GXX_RTTI
         auto *driver = dynamic_cast<Stm32Serial::Stm32HalUartItDriver *>(obj);
+#else
+        auto *driver = static_cast<Stm32Serial::Stm32HalUartItDriver *>(obj);
+#endif
         if (driver != nullptr) {
             driver->_rxIsr(Size);
         }
@@ -47,7 +55,7 @@ void Stm32Serial::Stm32HalUartItDriver::begin(unsigned long baud, uint8_t config
 
 void Stm32Serial::Stm32HalUartItDriver::_rxIsr(uint16_t Size) {
     getRxBuffer()->write(rx_buff, Size);
-    getTxBuffer()->write(rx_buff, Size);
+    // getTxBuffer()->write(rx_buff, Size);
     memset(rx_buff, 0, sizeof rx_buff);
     HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
 }
