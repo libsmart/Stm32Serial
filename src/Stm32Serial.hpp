@@ -8,10 +8,10 @@
 
 #include <libsmart_config.hpp>
 #include <cstdint>
-#include <climits>
-#include "StringBuffer.hpp"
 #include "Loggable.hpp"
-#include "StreamRxTx.hpp"
+#include "LogicalConnectionMicrorl.hpp"
+#include "StreamSession/Manager.hpp"
+#include "StreamSession/StreamSessionAware.hpp"
 
 #define DEFAULT_BAUD 115200
 #define DEFAULT_CONFIG 0
@@ -29,9 +29,11 @@ namespace Stm32Serial {
      *
      * @param driver The `AbstractDriver` object that will be associated with the `Stm32Serial` instance.
      */
-    class Stm32Serial : public Stm32ItmLogger::Loggable,
-                        public Stm32Common::StreamRxTx<LIBSMART_STM32SERIAL_BUFFER_SIZE_RX,
-                            LIBSMART_STM32SERIAL_BUFFER_SIZE_TX> {
+    class Stm32Serial
+            : public Stm32Common::Process::ProcessInterface,
+              public Stm32Common::StreamSession::StreamSessionAware,
+              public Stm32ItmLogger::Loggable,
+              public Stm32Common::Stream {
         friend class AbstractDriver;
 
     public:
@@ -44,7 +46,8 @@ namespace Stm32Serial {
          *
          * @param driver The `AbstractDriver` object that will be associated with the `Stm32Serial` instance.
          */
-        explicit Stm32Serial(AbstractDriver *driver): Stm32Serial(driver, &Stm32ItmLogger::emptyLogger) { ; }
+        explicit Stm32Serial(AbstractDriver *driver)
+            : Stm32Serial(driver, nullptr, &Stm32ItmLogger::emptyLogger) { ; }
 
 
         /**
@@ -58,8 +61,16 @@ namespace Stm32Serial {
          * @param driver The `AbstractDriver` object that will be associated with the `Stm32Serial` instance.
          * @param logger The `LoggerInterface` object that will be associated with the `Stm32Serial` instance.
          */
-        Stm32Serial(AbstractDriver *driver, Stm32ItmLogger::LoggerInterface *logger);
+        Stm32Serial(AbstractDriver *driver, Stm32ItmLogger::LoggerInterface *logger)
+            : Stm32Serial(driver, nullptr, logger) { ; }
 
+        Stm32Serial(AbstractDriver *driver, Stm32Common::StreamSession::ManagerInterface *session_mgr)
+            : Stm32Serial(driver, session_mgr, &Stm32ItmLogger::emptyLogger) { ; }
+
+        Stm32Serial(
+            AbstractDriver *driver,
+            Stm32Common::StreamSession::ManagerInterface *session_mgr,
+            Stm32ItmLogger::LoggerInterface *logger);
 
         /**
          * @brief Initialize the serial communication interface with the specified baud rate and configuration.
@@ -91,12 +102,21 @@ namespace Stm32Serial {
 
 
         /**
+         * @brief Initializes the Stm32Serial object.
+         *
+         * This function is responsible for setting up the Stm32Serial object by invoking the `begin` method.
+         * It is typically called to initialize the serial communication and prepare the interface for data transmission and reception.
+         */
+        void setup() override;
+
+
+        /**
          * @brief End the serial communication interface.
          *
          * This function ends the serial communication interface by calling the `end` function of the associated `driver`.
          * It should be called when you are done using the serial communication interface.
          */
-        void end();
+        void end() override;
 
 
         /**
@@ -112,8 +132,41 @@ namespace Stm32Serial {
          * It checks if there is any data received in the rxBuffer and logs it using the Debugger_log function.
          * It then clears the rxBuffer. Finally, it calls the checkTxBufferAndSend function of the driver to transmit any pending data in the txBuffer.
          */
-        virtual void loop();
+        void loop() override;
 
+
+        auto *getSession() {
+            auto session = getSessionManager()->getFirstSession();
+            if (session == nullptr) {
+                session = getSessionManager()->getNewSession(0);
+                session->setName("serial session");
+                session->setLogger(getLogger());
+                session->setup();
+            }
+            return session;
+        }
+
+        auto *getRxBuffer() { return getSession()->getRxBuffer(); }
+
+        auto *getTxBuffer() { return getSession()->getTxBuffer(); }
+
+        size_t getWriteBuffer(uint8_t *&buffer) override { return getSession()->getWriteBuffer(buffer); }
+
+        size_t setWrittenBytes(size_t size) override { return getSession()->setWrittenBytes(size); }
+
+        size_t write(uint8_t data) override { return getSession()->write(data); }
+
+        using Stream::write;
+
+        int availableForWrite() override { return getSession()->availableForWrite(); }
+
+        void flush() override { return getSession()->flush(); }
+
+        int available() override { return getSession()->available(); }
+
+        int read() override { return getSession()->read(); }
+
+        int peek() override { return getSession()->peek(); }
 
     private:
         AbstractDriver *driver;

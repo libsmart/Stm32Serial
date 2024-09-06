@@ -7,8 +7,13 @@
 #include "AbstractDriver.hpp"
 
 
-Stm32Serial::Stm32Serial::Stm32Serial(AbstractDriver *driver, Stm32ItmLogger::LoggerInterface *logger)
-    : Loggable(logger), driver(driver) {
+Stm32Serial::Stm32Serial::Stm32Serial(
+    AbstractDriver *driver,
+    Stm32Common::StreamSession::ManagerInterface *session_mgr,
+    Stm32ItmLogger::LoggerInterface *logger)
+    : Loggable(logger),
+      StreamSessionAware(session_mgr),
+      driver(driver) {
     driver->setSerialInstance(this);
     driver->setLogger(logger);
 }
@@ -29,6 +34,11 @@ void Stm32Serial::Stm32Serial::begin() {
 }
 
 
+void Stm32Serial::Stm32Serial::setup() {
+    begin();
+}
+
+
 void Stm32Serial::Stm32Serial::end() {
     flush();
     driver->end();
@@ -42,5 +52,6 @@ Stm32Serial::Stm32Serial::operator bool() {
 
 void Stm32Serial::Stm32Serial::loop() {
     driver->loop();
+    getSessionManager()->loop();
     driver->checkTxBufferAndSend();
 }
