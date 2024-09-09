@@ -9,7 +9,6 @@
 #include <libsmart_config.hpp>
 #include <cstdint>
 #include "Loggable.hpp"
-#include "LogicalConnectionMicrorl.hpp"
 #include "StreamSession/Manager.hpp"
 #include "StreamSession/StreamSessionAware.hpp"
 
