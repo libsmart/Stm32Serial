@@ -20,6 +20,8 @@ Stm32Serial::Stm32Serial::Stm32Serial(
 
 
 void Stm32Serial::Stm32Serial::begin(unsigned long baud, uint8_t config) {
+    log()->setSeverity(Stm32ItmLogger::LoggerInterface::Severity::INFORMATIONAL)
+            ->println("Stm32Serial::Stm32Serial::begin()");
     driver->begin(baud, config);
 }
 
