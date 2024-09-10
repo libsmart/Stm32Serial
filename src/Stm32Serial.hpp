@@ -10,6 +10,7 @@
 #include <cstdint>
 #include "Loggable.hpp"
 #include "StreamSession/Manager.hpp"
+#include "StreamSession/NullStreamSession.hpp"
 #include "StreamSession/StreamSessionAware.hpp"
 
 #define DEFAULT_BAUD 115200
@@ -32,6 +33,7 @@ namespace Stm32Serial {
             : public Stm32Common::Process::ProcessInterface,
               public Stm32Common::StreamSession::StreamSessionAware,
               public Stm32ItmLogger::Loggable,
+              public Stm32Common::Nameable,
               public Stm32Common::Stream {
         friend class AbstractDriver;
 
@@ -134,14 +136,43 @@ namespace Stm32Serial {
         void loop() override;
 
 
-        auto *getSession() {
-            auto session = getSessionManager()->getFirstSession();
-            if (session == nullptr) {
-                session = getSessionManager()->getNewSession(0);
-                session->setName("serial session");
+        Stm32Common::StreamSession::StreamSessionInterface *getSession() {
+
+            // Return nullStreamSession, if component is not running
+            if(!isRunning) return &Stm32Common::StreamSession::nullStreamSession;
+
+            // Return nullStreamSession, if no session manager is present
+            if(!hasSessionManager()) return &Stm32Common::StreamSession::nullStreamSession;
+
+            // Create a (hopefully) unique session id
+            sessionId = sessionId != 0 ? sessionId : reinterpret_cast<uint32_t>(this);
+
+            // Get the session, if it exists
+            auto session = getSessionManager()->getSessionById(sessionId);
+
+            if(session == nullptr) {
+                if((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0) {
+                    // Don't start a new session, if in isr
+                    return &Stm32Common::StreamSession::nullStreamSession;
+                }
+
+                // Create a new session
+                session = getSessionManager()->getNewSession(sessionId);
+                if (session == nullptr) {
+                    // Still no session => error
+                    isRunning = false;
+                    log()->setSeverity(Stm32ItmLogger::LoggerInterface::Severity::ERROR)
+                            ->printf("Can not start session (%s)\r\n", getName());
+                    end();
+                    return &Stm32Common::StreamSession::nullStreamSession;
+                }
+
+                // Initialize session
+                session->setName(getName());
                 session->setLogger(getLogger());
                 session->setup();
             }
+
             return session;
         }
 
@@ -169,6 +200,8 @@ namespace Stm32Serial {
 
     private:
         AbstractDriver *driver;
+        uint32_t sessionId{};
+        bool isRunning = false;
     };
 }
 

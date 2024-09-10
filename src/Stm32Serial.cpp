@@ -22,7 +22,12 @@ Stm32Serial::Stm32Serial::Stm32Serial(
 void Stm32Serial::Stm32Serial::begin(unsigned long baud, uint8_t config) {
     log()->setSeverity(Stm32ItmLogger::LoggerInterface::Severity::INFORMATIONAL)
             ->println("Stm32Serial::Stm32Serial::begin()");
+
+    // auto session = getSession();
+    // LIBSMART_UNUSED(session);
+
     driver->begin(baud, config);
+    isRunning = true;
 }
 
 
@@ -44,6 +49,7 @@ void Stm32Serial::Stm32Serial::setup() {
 void Stm32Serial::Stm32Serial::end() {
     flush();
     driver->end();
+    isRunning = false;
 }
 
 
@@ -53,6 +59,7 @@ Stm32Serial::Stm32Serial::operator bool() {
 
 
 void Stm32Serial::Stm32Serial::loop() {
+    if(!isRunning) return;
     driver->loop();
     getSessionManager()->loop();
     driver->checkTxBufferAndSend();
