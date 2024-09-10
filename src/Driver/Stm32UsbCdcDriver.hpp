@@ -54,9 +54,9 @@ namespace Stm32Serial {
 
         int8_t receive(uint8_t* Buf, const uint32_t *Len) {
             auto rxBuffer = getRxBuffer();
-            auto txBuffer = getTxBuffer();
+            // auto txBuffer = getTxBuffer();
             rxBuffer->write(Buf, *Len);
-            txBuffer->write(Buf, *Len);
+            // txBuffer->write(Buf, *Len);
             memset(Buf, 0, APP_RX_DATA_SIZE);
             USBD_CDC_SetRxBuffer(pdev, Buf);
             USBD_CDC_ReceivePacket(pdev);
