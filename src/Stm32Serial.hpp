@@ -151,7 +151,7 @@ namespace Stm32Serial {
             auto session = getSessionManager()->getSessionById(sessionId);
 
             if(session == nullptr) {
-                if((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0) {
+                if(isInIsr()) {
                     // Don't start a new session, if in isr
                     return &Stm32Common::StreamSession::nullStreamSession;
                 }
