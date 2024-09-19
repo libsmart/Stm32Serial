@@ -156,7 +156,7 @@ namespace Stm32Serial {
                 }
 
                 // Create a new session
-                session = getSessionManager()->getNewSession(sessionId);
+                session = getSessionManager()->getNewSession(this, sessionId);
                 if (session == nullptr) {
                     // Still no session => error
                     isRunning = false;
@@ -174,6 +174,8 @@ namespace Stm32Serial {
 
             return session;
         }
+
+        void dataReadyTx(Stm32Common::StreamSession::StreamSessionInterface *session) override;
 
         auto *getRxBuffer() { return getSession()->getRxBuffer(); }
 

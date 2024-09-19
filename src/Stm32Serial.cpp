@@ -62,6 +62,12 @@ void Stm32Serial::Stm32Serial::loop() {
     if (!isRunning) return;
     driver->loop();
     getSessionManager()->loop();
+}
+
+void Stm32Serial::Stm32Serial::dataReadyTx(Stm32Common::StreamSession::StreamSessionInterface *session) {
+    if (sessionId == 0) {
+        sessionId = session->getId();
+    }
     driver->checkTxBufferAndSend();
 }
 

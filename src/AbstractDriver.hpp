@@ -7,6 +7,7 @@
 #define LIBSMART_STM32SERIAL_ABSTRACTDRIVER_HPP
 
 #include <libsmart_config.hpp>
+#include "Loggable.hpp"
 #include "Stm32Serial.hpp"
 
 namespace Stm32Serial {

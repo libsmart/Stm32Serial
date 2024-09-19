@@ -63,12 +63,21 @@ void Stm32Serial::Stm32HalUartItDriver::_rxIsr(uint16_t Size) {
 
 void Stm32Serial::Stm32HalUartItDriver::_txIsr() {
     auto txBuffer = getTxBuffer();
+#ifdef LIBSMART_ENABLE_DIRECT_BUFFER_READ
     if (txBuffer->getLength() > 0) {
         auto ret = this->transmit(txBuffer->getReadPointer(), txBuffer->getLength());
         if (ret > 0) {
             txBuffer->remove(ret);
         }
     }
+#else
+    if (txBuffer->getLength() > 0) {
+        uint8_t ch = txBuffer->peek();
+        if(this->transmit(&ch,1) == 1) {
+            txBuffer->remove(1);
+        }
+    }
+#endif
 }
 
 
