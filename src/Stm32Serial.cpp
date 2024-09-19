@@ -59,8 +59,18 @@ Stm32Serial::Stm32Serial::operator bool() {
 
 
 void Stm32Serial::Stm32Serial::loop() {
-    if(!isRunning) return;
+    if (!isRunning) return;
     driver->loop();
     getSessionManager()->loop();
     driver->checkTxBufferAndSend();
+}
+
+size_t Stm32Serial::Stm32Serial::write(uint8_t data) {
+    return getSession()->write(data);
+}
+
+void Stm32Serial::Stm32Serial::flush() {
+    loop();
+    getSessionManager()->flush();
+    driver->flush();
 }

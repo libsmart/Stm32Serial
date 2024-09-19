@@ -137,12 +137,11 @@ namespace Stm32Serial {
 
 
         Stm32Common::StreamSession::StreamSessionInterface *getSession() {
-
             // Return nullStreamSession, if component is not running
-            if(!isRunning) return &Stm32Common::StreamSession::nullStreamSession;
+            if (!isRunning) return &Stm32Common::StreamSession::nullStreamSession;
 
             // Return nullStreamSession, if no session manager is present
-            if(!hasSessionManager()) return &Stm32Common::StreamSession::nullStreamSession;
+            if (!hasSessionManager()) return &Stm32Common::StreamSession::nullStreamSession;
 
             // Create a (hopefully) unique session id
             sessionId = sessionId != 0 ? sessionId : reinterpret_cast<uint32_t>(this);
@@ -150,8 +149,8 @@ namespace Stm32Serial {
             // Get the session, if it exists
             auto session = getSessionManager()->getSessionById(sessionId);
 
-            if(session == nullptr) {
-                if(isInIsr()) {
+            if (session == nullptr) {
+                if (isInIsr()) {
                     // Don't start a new session, if in isr
                     return &Stm32Common::StreamSession::nullStreamSession;
                 }
@@ -180,17 +179,19 @@ namespace Stm32Serial {
 
         auto *getTxBuffer() { return getSession()->getTxBuffer(); }
 
+#ifdef LIBSMART_ENABLE_DIRECT_BUFFER_WRITE
         size_t getWriteBuffer(uint8_t *&buffer) override { return getSession()->getWriteBuffer(buffer); }
 
         size_t setWrittenBytes(size_t size) override { return getSession()->setWrittenBytes(size); }
+#endif
 
-        size_t write(uint8_t data) override { return getSession()->write(data); }
+        size_t write(uint8_t data) override;
 
         using Stream::write;
 
         int availableForWrite() override { return getSession()->availableForWrite(); }
 
-        void flush() override { return getSession()->flush(); }
+        void flush() override;
 
         int available() override { return getSession()->available(); }
 
