@@ -201,6 +201,8 @@ namespace Stm32Serial {
 
         int peek() override { return getSession()->peek(); }
 
+        void errorHandler() override { ; }
+
     private:
         AbstractDriver *driver;
         uint32_t sessionId{};
