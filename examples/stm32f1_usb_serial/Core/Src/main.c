@@ -26,6 +26,7 @@
 #include "defines.h"
 #include "globals.h"
 #include "main.hpp"
+#include "Stm32ItmLoggerCPPWrapper.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -194,6 +195,10 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+
+  Logger_printf("Wrong parameters value: file %s on line %d\r\n", file, line);
+  Error_Handler();
+
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

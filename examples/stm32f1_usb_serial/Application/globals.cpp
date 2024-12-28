@@ -9,18 +9,5 @@
  */
 
 #include "globals.hpp"
-#include "main.h"
-#include "usb_device.h"
 
-//uint32_t micros() {
-//    uint32_t micros = HAL_GetTick() * 1000;  // Millisekunden in Mikrosekunden umrechnen
-//    micros += (SysTick->LOAD - SysTick->VAL) /
-//              (SystemCoreClock / 1000000); // Zeit seit dem letzten Millisekunden-Überlauf hinzufügen
-//    return micros;
-//}
 
-uint32_t dummyCpp;
-
-extern USBD_HandleTypeDef hUsbDeviceFS;
-Stm32Serial::Stm32UsbCdcDriver UsbSerialDriver(&hUsbDeviceFS, "UsbSerialDriver");
-Stm32Serial::Stm32Serial Serial(reinterpret_cast<Stm32Serial::AbstractDriver *>(&UsbSerialDriver));

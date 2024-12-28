@@ -15,4 +15,4 @@
 
 #define LIBSMART_OVERWRITE_verbose_terminate_handler
 #undef LIBSMART_ENABLE_STD_FUNCTION
-#undef LIBSMART_ENABLE_PRINTF
+// #undef LIBSMART_ENABLE_PRINTF

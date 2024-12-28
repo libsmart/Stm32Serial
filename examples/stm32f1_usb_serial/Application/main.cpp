@@ -19,9 +19,13 @@
  * @see main() in Core/Src/main.c
  */
 void setup() {
+    Stm32ItmLogger::logger.setSeverity(Stm32ItmLogger::LoggerInterface::Severity::INFORMATIONAL)
+            ->println("::setup()");
+
     dummyCpp = 0;
     dummyCandCpp = 0;
     Serial.begin();
+    Serial.print('\0');
 }
 
 
@@ -34,7 +38,7 @@ void loop() {
     dummyCpp++;
     dummyCandCpp++;
 
-
+    Serial.loop();
     Serial.print("counter = ");
     Serial.print(dummyCpp);
     Serial.println();
@@ -54,7 +58,16 @@ void loop() {
  * @see Error_Handler() in Core/Src/main.c
  */
 void errorHandler() {
+    HAL_GPIO_WritePin(LED1_GRN_GPIO_Port, LED1_GRN_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED2_ORG_GPIO_Port, LED2_ORG_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED3_RED_GPIO_Port, LED3_RED_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED4_BLU_GPIO_Port, LED4_BLU_Pin, GPIO_PIN_RESET);
+
     while (true) {
-//        for (uint32_t i = (SystemCoreClock / 10); i > 0; i--) { UNUSED(i); }
+        for (uint32_t i = (SystemCoreClock / 10); i > 0; i--) { UNUSED(i); }
+        HAL_GPIO_TogglePin(LED1_GRN_GPIO_Port, LED1_GRN_Pin);
+        HAL_GPIO_TogglePin(LED2_ORG_GPIO_Port, LED2_ORG_Pin);
+        HAL_GPIO_TogglePin(LED3_RED_GPIO_Port, LED3_RED_Pin);
+        HAL_GPIO_TogglePin(LED4_BLU_GPIO_Port, LED4_BLU_Pin);
     }
 }

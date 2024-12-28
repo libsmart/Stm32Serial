@@ -17,25 +17,28 @@ Enable driver in `libsmart_config.hpp`
 Create driver and serial instance in `globals.hpp`:
 
 ```c++
-inline Stm32Serial::Stm32HalUartItDriver Uart1SerialDriver(&huart1, "Uart1SerialDriver");
-inline Stm32Serial::Stm32Serial Serial1(&Uart1SerialDriver);
+extern USBD_HandleTypeDef hUsbDeviceFS;
+inline Stm32Common::StreamSession::Manager<Stm32Common::StreamSession::EchoStreamSession, 1> echoStreamSessionManager(&Logger);
+inline Stm32Serial::Stm32UsbCdcDriver UsbSerialDriver(&hUsbDeviceFS, "UsbSerialDriver");
+inline Stm32Serial::Stm32Serial Serial(&UsbSerialDriver, &echoStreamSessionManager, &Logger);
+
 ```
 
 Initialize serial instance in `setup()`:
 
 ``` 
-Serial1.begin();
+Serial.begin();
 ```
 
 Call the loop() function repeatedly:
 
 ```
-Serial1.loop();
+Serial.loop();
 ```
 
 
 
-You may want to overload the serial instance to do something useful with the sent data.
+
 
 
 

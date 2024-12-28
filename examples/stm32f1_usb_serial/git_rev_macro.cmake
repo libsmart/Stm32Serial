@@ -2,6 +2,10 @@
 # * include this file at the end of CMakeLists_template.txt
 #   `include(git_rev_macro.cmake)`
 #
+# History:
+# v1.0.0 Initial release
+# v1.1.0 Always build git_rev_macro.txt, if main target is built
+#
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 execute_process(
@@ -20,12 +24,14 @@ if(NOT ${PROCESS_RESULT} EQUAL 0)
 endif()
 file(STRINGS ${PROJECT_SOURCE_DIR}/git_rev_macro.txt GIT_REVISION_FLAGS)
 add_definitions(${GIT_REVISION_FLAGS})
-add_custom_command(
-        OUTPUT ${PROJECT_SOURCE_DIR}/git_rev_macro.txt
+#add_custom_command(
+#        OUTPUT ${PROJECT_SOURCE_DIR}/git_rev_macro.txt
+#        COMMAND Python3::Interpreter ${CMAKE_SOURCE_DIR}/git_rev_macro.py > ${PROJECT_SOURCE_DIR}/git_rev_macro.txt
+#        COMMENT "Executing git_rev_macro.py to generate compiler flags"
+#)
+add_custom_target(git_rev_macro_txt ALL
+#        DEPENDS ${PROJECT_SOURCE_DIR}/git_rev_macro.txt
         COMMAND Python3::Interpreter ${CMAKE_SOURCE_DIR}/git_rev_macro.py > ${PROJECT_SOURCE_DIR}/git_rev_macro.txt
         COMMENT "Executing git_rev_macro.py to generate compiler flags"
-)
-add_custom_target(git_rev_macro_txt ALL
-        DEPENDS ${PROJECT_SOURCE_DIR}/git_rev_macro.txt
 )
 add_dependencies(${PROJECT_NAME}.elf git_rev_macro_txt)
