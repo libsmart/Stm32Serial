@@ -8,7 +8,6 @@
 
 #include "Stm32HalUartItDriver.hpp"
 #include "EmptyLogger.hpp"
-#include "globals.hpp"
 #include "Helper.hpp"
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
