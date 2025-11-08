@@ -106,18 +106,7 @@ namespace Stm32Serial {
          *
          * @return The size of the transmitted data if the transmission was successful, 0 otherwise.
          */
-        size_t transmit(const uint8_t *str, size_t strlen) override {
-            if (huart->gState != HAL_UART_STATE_READY) {
-                return 0;
-            }
-            size_t sz = strlen > sizeof tx_buff ? sizeof tx_buff : strlen;
-            memset(tx_buff, 0, sizeof tx_buff);
-            memcpy(tx_buff, str, sz);
-            if (HAL_OK == HAL_UART_Transmit_IT(huart, tx_buff, sz)) {
-                return sz;
-            }
-            return 0;
-        }
+        size_t transmit(const uint8_t *str, size_t strlen) override;
 
         /**
          * @brief Check the TX buffer and initiate sending.

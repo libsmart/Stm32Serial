@@ -44,7 +44,7 @@ void Stm32Serial::Stm32HalUartItDriver::begin(unsigned long baud, uint8_t config
     log()->println("Stm32Serial::Stm32HalUartItDriver::begin()");
 
     AbstractDriver::begin(baud, config);
-    auto ret = HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
+    auto ret = HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof(rx_buff));
     if (ret != HAL_OK) {
         log()->print("HAL_UARTEx_ReceiveToIdle_IT = 0x");
         log()->println(ret, HEX);
@@ -53,10 +53,12 @@ void Stm32Serial::Stm32HalUartItDriver::begin(unsigned long baud, uint8_t config
 
 
 void Stm32Serial::Stm32HalUartItDriver::_rxIsr(uint16_t Size) {
+    __disable_irq();
     getRxBuffer()->write(rx_buff, Size);
+    __enable_irq();
     // getTxBuffer()->write(rx_buff, Size);
-    memset(rx_buff, 0, sizeof rx_buff);
-    HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof rx_buff);
+    // memset(rx_buff, 0, sizeof rx_buff);
+    HAL_UARTEx_ReceiveToIdle_IT(huart, rx_buff, sizeof(rx_buff));
 }
 
 
@@ -64,10 +66,10 @@ void Stm32Serial::Stm32HalUartItDriver::_txIsr() {
     auto txBuffer = getTxBuffer();
 #ifdef LIBSMART_ENABLE_DIRECT_BUFFER_READ
     if (txBuffer->getLength() > 0) {
-        auto ret = this->transmit(txBuffer->getReadPointer(), txBuffer->getLength());
-        if (ret > 0) {
-            txBuffer->remove(ret);
-        }
+        __disable_irq();
+        const auto ret = this->transmit(txBuffer->getReadPointer(), txBuffer->getLength());
+        txBuffer->remove(ret);
+        __enable_irq();
     }
 #else
     if (txBuffer->getLength() > 0) {
@@ -82,6 +84,19 @@ void Stm32Serial::Stm32HalUartItDriver::_txIsr() {
 
 void Stm32Serial::Stm32HalUartItDriver::loop() {
     AbstractDriver::loop();
+}
+
+size_t Stm32Serial::Stm32HalUartItDriver::transmit(const uint8_t *str, size_t strlen) {
+    if (huart->gState != HAL_UART_STATE_READY) {
+        return 0;
+    }
+    const auto sz = std::min(sizeof(tx_buff), strlen);
+    memset(tx_buff, 0, sizeof tx_buff);
+    memcpy(tx_buff, str, sz);
+    if (HAL_OK == HAL_UART_Transmit_IT(huart, tx_buff, sz)) {
+        return sz;
+    }
+    return 0;
 }
 
 
